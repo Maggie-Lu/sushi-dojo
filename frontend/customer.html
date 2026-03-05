@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Sushi Dojo — Order Online</title>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --ink: #1a1208;
+    --rice: #f7f3ec;
+    --vermillion: #c0392b;
+    --gold: #c9a84c;
+    --muted: #8a7f72;
+    --paper: #fdf9f3;
+    --border: rgba(26,18,8,0.1);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--ink);
+    color: var(--rice);
+    padding: 0 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    border-bottom: 2px solid var(--vermillion);
+  }
+
+  .logo {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .logo-kanji {
+    color: var(--vermillion);
+    font-size: 1.2rem;
+  }
+
+  .cart-btn {
+    background: var(--vermillion);
+    color: white;
+    border: none;
+    padding: 0.5rem 1.2rem;
+    border-radius: 2px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: background 0.2s;
+  }
+  .cart-btn:hover { background: #a93226; }
+
+  .cart-count {
+    background: var(--gold);
+    color: var(--ink);
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+
+  /* HERO */
+  .hero {
+    background: var(--ink);
+    color: var(--rice);
+    padding: 3rem 2rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '道場';
+    position: absolute;
+    font-family: 'Shippori Mincho', serif;
+    font-size: 12rem;
+    opacity: 0.04;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    color: var(--rice);
+  }
+
+  .hero h1 {
+    font-family: 'Shippori Mincho', serif;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    margin-bottom: 0.5rem;
+  }
+
+  .hero p {
+    color: var(--muted);
+    font-size: 1rem;
+    font-weight: 300;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .order-type-toggle {
+    display: flex;
+    justify-content: center;
+    gap: 0;
+    margin-top: 2rem;
+  }
+
+  .toggle-btn {
+    padding: 0.6rem 2rem;
+    border: 1px solid var(--muted);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    transition: all 0.2s;
+  }
+
+  .toggle-btn:first-child { border-radius: 2px 0 0 2px; }
+  .toggle-btn:last-child { border-radius: 0 2px 2px 0; }
+
+  .toggle-btn.active {
+    background: var(--vermillion);
+    border-color: var(--vermillion);
+    color: white;
+  }
+
+  /* LAYOUT */
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    gap: 0;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+    gap: 2rem;
+    align-items: start;
+  }
+
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    .cart-sidebar { display: none; }
+  }
+
+  /* MENU */
+  .category {
+    margin-bottom: 2.5rem;
+  }
+
+  .category-title {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--ink);
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .category-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .items-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1rem;
+  }
+
+  .item-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1.25rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .item-card:hover {
+    border-color: var(--vermillion);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(192,57,43,0.1);
+  }
+
+  .item-emoji {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    display: block;
+  }
+
+  .item-name {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+  }
+
+  .item-desc {
+    font-size: 0.8rem;
+    color: var(--muted);
+    line-height: 1.5;
+    margin-bottom: 0.75rem;
+  }
+
+  .item-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .item-price {
+    font-weight: 500;
+    color: var(--vermillion);
+    font-size: 1rem;
+  }
+
+  .add-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--ink);
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+  }
+
+  .add-btn:hover { background: var(--vermillion); }
+
+  .in-cart-badge {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    background: var(--vermillion);
+    color: white;
+    border-radius: 10px;
+    padding: 0.1rem 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+
+  /* CART SIDEBAR */
+  .cart-sidebar {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    position: sticky;
+    top: 80px;
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
+  }
+
+  .cart-header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    font-family: 'Shippori Mincho', serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .cart-empty {
+    padding: 2rem 1.5rem;
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+
+  .cart-items { padding: 1rem 1.5rem; }
+
+  .cart-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .cart-item-emoji { font-size: 1.3rem; }
+
+  .cart-item-info { flex: 1; }
+  .cart-item-name { font-size: 0.85rem; font-weight: 500; }
+  .cart-item-price { font-size: 0.8rem; color: var(--muted); }
+
+  .cart-item-qty {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .qty-btn {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: white;
+    cursor: pointer;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+
+  .qty-btn:hover { background: var(--ink); color: white; border-color: var(--ink); }
+
+  .qty-num { font-size: 0.85rem; font-weight: 500; min-width: 16px; text-align: center; }
+
+  .cart-total {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    font-weight: 600;
+    font-size: 1rem;
+  }
+
+  .checkout-btn {
+    margin: 0 1.5rem 1.5rem;
+    width: calc(100% - 3rem);
+    padding: 0.85rem;
+    background: var(--vermillion);
+    color: white;
+    border: none;
+    border-radius: 2px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    transition: background 0.2s;
+  }
+
+  .checkout-btn:hover { background: #a93226; }
+  .checkout-btn:disabled { background: var(--muted); cursor: default; }
+
+  /* MODAL */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(26,18,8,0.7);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--paper);
+    border-radius: 4px;
+    width: 100%;
+    max-width: 480px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: slideUp 0.3s ease;
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(30px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  .modal-header {
+    background: var(--ink);
+    color: var(--rice);
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .modal-header h2 {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 1.25rem;
+  }
+
+  .modal-close {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 1.5rem;
+    line-height: 1;
+  }
+
+  .modal-body { padding: 1.5rem; }
+
+  .form-group { margin-bottom: 1.25rem; }
+
+  label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.4rem;
+  }
+
+  input, textarea, select {
+    width: 100%;
+    padding: 0.7rem 0.9rem;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    background: white;
+    color: var(--ink);
+    transition: border-color 0.2s;
+    outline: none;
+  }
+
+  input:focus, textarea:focus { border-color: var(--vermillion); }
+
+  textarea { resize: vertical; min-height: 80px; }
+
+  .order-summary {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 1rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .summary-title {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .summary-item {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    padding: 0.25rem 0;
+    color: var(--muted);
+  }
+
+  .summary-total {
+    display: flex;
+    justify-content: space-between;
+    font-weight: 600;
+    font-size: 0.95rem;
+    padding-top: 0.5rem;
+    margin-top: 0.25rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .submit-btn {
+    width: 100%;
+    padding: 0.9rem;
+    background: var(--vermillion);
+    color: white;
+    border: none;
+    border-radius: 2px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    transition: background 0.2s;
+  }
+
+  .submit-btn:hover { background: #a93226; }
+
+  /* SUCCESS */
+  .success-screen {
+    display: none;
+    text-align: center;
+    padding: 2rem;
+  }
+
+  .success-screen.show { display: block; }
+  .success-form.hide { display: none; }
+
+  .success-icon { font-size: 4rem; margin-bottom: 1rem; }
+
+  .success-screen h3 {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .success-screen p { color: var(--muted); font-size: 0.9rem; }
+
+  .order-id-badge {
+    display: inline-block;
+    background: var(--ink);
+    color: var(--rice);
+    padding: 0.3rem 1rem;
+    border-radius: 2px;
+    font-size: 0.85rem;
+    margin: 1rem 0;
+    font-weight: 500;
+  }
+
+  /* MOBILE CART */
+  .mobile-cart-bar {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--ink);
+    color: white;
+    padding: 1rem 1.5rem;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 100;
+    border-top: 2px solid var(--vermillion);
+  }
+
+  @media (max-width: 900px) {
+    .mobile-cart-bar { display: flex; }
+    body { padding-bottom: 80px; }
+  }
+
+  .mobile-cart-info { font-size: 0.9rem; }
+  .mobile-cart-total { font-weight: 600; }
+
+  .mobile-checkout-btn {
+    background: var(--vermillion);
+    color: white;
+    border: none;
+    padding: 0.6rem 1.5rem;
+    border-radius: 2px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <span class="logo-kanji">道場</span> Sushi Dojo
+  </div>
+  <button class="cart-btn" onclick="openModal()">
+    🛒 Cart <span class="cart-count" id="cartCount">0</span>
+  </button>
+</header>
+
+<div class="hero">
+  <h1>Order Online</h1>
+  <p>Fresh • Crafted • Delivered</p>
+  <div class="order-type-toggle">
+    <button class="toggle-btn active" onclick="setOrderType('pickup', this)">🏃 Pickup</button>
+    <button class="toggle-btn" onclick="setOrderType('delivery', this)">🛵 Delivery</button>
+  </div>
+</div>
+
+<div class="layout">
+  <div class="menu" id="menuContainer">Loading menu...</div>
+
+  <div class="cart-sidebar">
+    <div class="cart-header">
+      Your Order
+      <span style="font-size:0.8rem;color:var(--muted);font-family:'DM Sans',sans-serif;font-weight:300" id="orderTypeLabel">Pickup</span>
+    </div>
+    <div id="cartContent">
+      <div class="cart-empty">Your cart is empty.<br/>Add items from the menu.</div>
+    </div>
+    <div class="cart-total" id="cartTotal" style="display:none">
+      <span>Total</span><span id="totalAmount">$0.00</span>
+    </div>
+    <button class="checkout-btn" id="checkoutBtn" disabled onclick="openModal()">Place Order</button>
+  </div>
+</div>
+
+<!-- Mobile cart bar -->
+<div class="mobile-cart-bar" id="mobilCartBar" style="display:none">
+  <div class="mobile-cart-info">
+    <span id="mobileItemCount">0 items</span>
+  </div>
+  <div class="mobile-cart-total" id="mobileTotalAmount">$0.00</div>
+  <button class="mobile-checkout-btn" onclick="openModal()">Order →</button>
+</div>
+
+<!-- Checkout Modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Complete Your Order</h2>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="success-screen" id="successScreen">
+        <div class="success-icon">🎉</div>
+        <h3>Order Placed!</h3>
+        <div class="order-id-badge" id="orderIdBadge">#0000</div>
+        <p>Your order has been received by Sushi Dojo.<br/>We'll have it ready soon!</p>
+        <br/>
+        <button class="submit-btn" onclick="closeModal(); resetCart()">Start New Order</button>
+      </div>
+
+      <div class="success-form" id="checkoutForm">
+        <!-- Order Summary -->
+        <div class="order-summary">
+          <div class="summary-title">Order Summary</div>
+          <div id="modalSummaryItems"></div>
+          <div class="summary-total">
+            <span>Total</span>
+            <span id="modalTotal">$0.00</span>
+          </div>
+        </div>
+
+        <!-- Customer Info -->
+        <div class="form-group">
+          <label>Your Name *</label>
+          <input type="text" id="customerName" placeholder="Tanaka-san" />
+        </div>
+        <div class="form-group">
+          <label>Phone Number *</label>
+          <input type="tel" id="customerPhone" placeholder="(555) 000-0000" />
+        </div>
+        <div class="form-group" id="addressGroup" style="display:none">
+          <label>Delivery Address *</label>
+          <input type="text" id="customerAddress" placeholder="123 Main St, City, State" />
+        </div>
+        <div class="form-group">
+          <label>Special Instructions</label>
+          <textarea id="orderNotes" placeholder="Allergies, preferences, etc."></textarea>
+        </div>
+
+        <button class="submit-btn" onclick="submitOrder()">🍣 Place Order</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script>
+const API = CONFIG.API;
+let cart = [];
+let orderType = 'pickup';
+let menuData = null;
+
+async function loadMenu() {
+  try {
+    const res = await fetch(`${API}/menu`);
+    menuData = await res.json();
+    renderMenu();
+  } catch (e) {
+    document.getElementById('menuContainer').innerHTML = `
+      <div style="text-align:center;padding:3rem;color:var(--muted)">
+        <p>⚠️ Could not connect to server.</p>
+        <p style="font-size:0.8rem;margin-top:0.5rem">Make sure the backend is running on port 8000.</p>
+        <button onclick="loadMenu()" style="margin-top:1rem;padding:0.5rem 1rem;background:var(--vermillion);color:white;border:none;border-radius:2px;cursor:pointer">Retry</button>
+      </div>`;
+  }
+}
+
+function renderMenu() {
+  const container = document.getElementById('menuContainer');
+  container.innerHTML = menuData.categories.map(cat => `
+    <div class="category">
+      <div class="category-title">${cat.name}</div>
+      <div class="items-grid">
+        ${cat.items.map(item => {
+          const qty = getItemQty(item.id);
+          return `
+          <div class="item-card" onclick="addToCart(${JSON.stringify(item).replace(/"/g, '&quot;')})">
+            ${qty > 0 ? `<div class="in-cart-badge">×${qty}</div>` : ''}
+            <span class="item-emoji">${item.emoji}</span>
+            <div class="item-name">${item.name}</div>
+            <div class="item-desc">${item.description}</div>
+            <div class="item-footer">
+              <span class="item-price">$${item.price.toFixed(2)}</span>
+              <button class="add-btn" onclick="event.stopPropagation(); addToCart(${JSON.stringify(item).replace(/"/g, '&quot;')})">+</button>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+function getItemQty(id) {
+  const found = cart.find(i => i.id === id);
+  return found ? found.quantity : 0;
+}
+
+function addToCart(item) {
+  const existing = cart.find(i => i.id === item.id);
+  if (existing) {
+    existing.quantity++;
+  } else {
+    cart.push({ ...item, quantity: 1 });
+  }
+  updateCart();
+  if (menuData) renderMenu();
+}
+
+function changeQty(id, delta) {
+  const idx = cart.findIndex(i => i.id === id);
+  if (idx === -1) return;
+  cart[idx].quantity += delta;
+  if (cart[idx].quantity <= 0) cart.splice(idx, 1);
+  updateCart();
+  if (menuData) renderMenu();
+}
+
+function updateCart() {
+  const total = cart.reduce((s, i) => s + i.price * i.quantity, 0);
+  const count = cart.reduce((s, i) => s + i.quantity, 0);
+
+  document.getElementById('cartCount').textContent = count;
+
+  const cartContent = document.getElementById('cartContent');
+  const cartTotalEl = document.getElementById('cartTotal');
+  const checkoutBtn = document.getElementById('checkoutBtn');
+
+  if (cart.length === 0) {
+    cartContent.innerHTML = '<div class="cart-empty">Your cart is empty.<br/>Add items from the menu.</div>';
+    cartTotalEl.style.display = 'none';
+    checkoutBtn.disabled = true;
+    document.getElementById('mobilCartBar').style.display = 'none';
+  } else {
+    cartContent.innerHTML = `<div class="cart-items">${cart.map(item => `
+      <div class="cart-item">
+        <span class="cart-item-emoji">${item.emoji}</span>
+        <div class="cart-item-info">
+          <div class="cart-item-name">${item.name}</div>
+          <div class="cart-item-price">$${(item.price * item.quantity).toFixed(2)}</div>
+        </div>
+        <div class="cart-item-qty">
+          <button class="qty-btn" onclick="changeQty(${item.id}, -1)">−</button>
+          <span class="qty-num">${item.quantity}</span>
+          <button class="qty-btn" onclick="changeQty(${item.id}, 1)">+</button>
+        </div>
+      </div>
+    `).join('')}</div>`;
+    cartTotalEl.style.display = 'flex';
+    document.getElementById('totalAmount').textContent = `$${total.toFixed(2)}`;
+    checkoutBtn.disabled = false;
+
+    // Mobile bar
+    document.getElementById('mobilCartBar').style.display = 'flex';
+    document.getElementById('mobileItemCount').textContent = `${count} item${count > 1 ? 's' : ''}`;
+    document.getElementById('mobileTotalAmount').textContent = `$${total.toFixed(2)}`;
+  }
+}
+
+function setOrderType(type, btn) {
+  orderType = type;
+  document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('orderTypeLabel').textContent = type === 'pickup' ? 'Pickup' : 'Delivery';
+  document.getElementById('addressGroup').style.display = type === 'delivery' ? 'block' : 'none';
+}
+
+function openModal() {
+  if (cart.length === 0) return;
+  const total = cart.reduce((s, i) => s + i.price * i.quantity, 0);
+  document.getElementById('modalSummaryItems').innerHTML = cart.map(i => `
+    <div class="summary-item">
+      <span>${i.emoji} ${i.name} ×${i.quantity}</span>
+      <span>$${(i.price * i.quantity).toFixed(2)}</span>
+    </div>
+  `).join('');
+  document.getElementById('modalTotal').textContent = `$${total.toFixed(2)}`;
+  document.getElementById('addressGroup').style.display = orderType === 'delivery' ? 'block' : 'none';
+  document.getElementById('successScreen').classList.remove('show');
+  document.getElementById('checkoutForm').classList.remove('hide');
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+
+async function submitOrder() {
+  const name = document.getElementById('customerName').value.trim();
+  const phone = document.getElementById('customerPhone').value.trim();
+  const address = document.getElementById('customerAddress').value.trim();
+  const notes = document.getElementById('orderNotes').value.trim();
+
+  if (!name || !phone) { alert('Please enter your name and phone number.'); return; }
+  if (orderType === 'delivery' && !address) { alert('Please enter your delivery address.'); return; }
+
+  const total = cart.reduce((s, i) => s + i.price * i.quantity, 0);
+
+  const payload = {
+    customer_name: name,
+    order_type: orderType,
+    address: address || null,
+    phone,
+    items: cart.map(i => ({ id: i.id, name: i.name, price: i.price, quantity: i.quantity, emoji: i.emoji })),
+    total,
+    notes: notes || null
+  };
+
+  try {
+    const res = await fetch(`${API}/orders`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const order = await res.json();
+    document.getElementById('orderIdBadge').textContent = `Order #${String(order.id).padStart(4, '0')}`;
+    document.getElementById('checkoutForm').classList.add('hide');
+    document.getElementById('successScreen').classList.add('show');
+  } catch (e) {
+    alert('Error placing order. Please make sure the server is running.');
+  }
+}
+
+function resetCart() {
+  cart = [];
+  updateCart();
+  if (menuData) renderMenu();
+  document.getElementById('customerName').value = '';
+  document.getElementById('customerPhone').value = '';
+  document.getElementById('customerAddress').value = '';
+  document.getElementById('orderNotes').value = '';
+}
+
+document.getElementById('modalOverlay').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+loadMenu();
+</script>
+</body>
+</html>
