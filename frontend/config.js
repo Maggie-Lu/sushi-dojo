@@ -5,8 +5,8 @@
 
 const CONFIG = {
   // Local development (default)
-  API: "http://localhost:8000",
-  WS:  "ws://localhost:8000/ws",
+  API: "http://sushi-dojo-production.up.railway.app",
+  WS:  "ws://sushi-dojo-production.up.railway.app/ws",
 
   // Production — uncomment and fill in after Railway deployment:
   // API: "https://YOUR-APP-NAME.railway.app",
