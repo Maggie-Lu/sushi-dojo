@@ -97,7 +97,7 @@ async def create_order(order: OrderCreate):
     db = get_db()
     cursor = db.cursor()
 
-    items_json = json.dumps([item.model_dump() for item in order.items])
+    items_json = json.dumps([item.dict() for item in order.items])
 
     if DATABASE_URL:
         cursor.execute("""
@@ -130,7 +130,7 @@ async def create_order(order: OrderCreate):
 
     await manager.broadcast({"type": "new_order", "order": {
         **new_order,
-        "items": [item.model_dump() for item in order.items]
+        "items": [item.dict() for item in order.items]
     }})
     return new_order
 
