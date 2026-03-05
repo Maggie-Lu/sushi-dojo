@@ -10,7 +10,7 @@ class OrderItem(BaseModel):
 
 class OrderCreate(BaseModel):
     customer_name: str
-    order_type: str  # "pickup" or "delivery"
+    order_type: str
     address: Optional[str] = None
     phone: str
     items: List[OrderItem]
@@ -18,4 +18,4 @@ class OrderCreate(BaseModel):
     notes: Optional[str] = None
 
 class OrderStatusUpdate(BaseModel):
-    status: str  # pending, preparing, ready, delivered
+    status: str
