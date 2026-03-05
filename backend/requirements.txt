@@ -1,6 +1,6 @@
-fastapi==0.100.0
-uvicorn==0.23.2
-pydantic==1.10.13
-websockets==11.0.3
+fastapi==0.115.0
+uvicorn==0.30.6
+pydantic==2.9.2
+websockets==13.1
 psycopg2-binary==2.9.9
-python-dotenv==1.0.0
+python-dotenv==1.0.1
