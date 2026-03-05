@@ -4,3 +4,4 @@ pydantic==2.9.2
 websockets==13.1
 psycopg2-binary==2.9.9
 python-dotenv==1.0.1
+twilio==9.3.6

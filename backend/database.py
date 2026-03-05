@@ -1,9 +1,8 @@
 import os
 import sqlite3
 
-DATABASE_URL = os.environ.get("DATABASE_URL")  # Set by Railway PostgreSQL
+DATABASE_URL = os.environ.get("DATABASE_URL")
 
-# --- PostgreSQL (production) ---
 if DATABASE_URL:
     import psycopg2
     import psycopg2.extras
@@ -25,14 +24,17 @@ if DATABASE_URL:
                 total REAL NOT NULL,
                 notes TEXT,
                 status TEXT DEFAULT 'pending',
+                eta TEXT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
+        """)
+        # Add eta column if it doesn't exist (for existing deployments)
+        cursor.execute("""
+            ALTER TABLE orders ADD COLUMN IF NOT EXISTS eta TEXT
         """)
         db.commit()
         cursor.close()
         db.close()
-
-# --- SQLite (local development) ---
 else:
     DB_PATH = "sushi_dojo.db"
 
@@ -53,6 +55,7 @@ else:
                 total REAL NOT NULL,
                 notes TEXT,
                 status TEXT DEFAULT 'pending',
+                eta TEXT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         """)

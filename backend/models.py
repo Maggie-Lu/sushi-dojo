@@ -19,3 +19,7 @@ class OrderCreate(BaseModel):
 
 class OrderStatusUpdate(BaseModel):
     status: str
+    eta_minutes: Optional[int] = None
+
+class OrderETAUpdate(BaseModel):
+    eta_minutes: int
