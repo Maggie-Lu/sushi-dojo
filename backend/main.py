@@ -34,7 +34,12 @@ def send_sms(to_phone: str, message: str):
         phone = to_phone.strip().replace(" ", "").replace("-", "").replace("(", "").replace(")", "")
         if not phone.startswith("+"):
             phone = "+1" + phone
-        client.messages.create(body=message, from_=TWILIO_FROM, to=phone)
+        # Use Messaging Service if available, otherwise fall back to phone number
+        twilio_msg_service = os.environ.get("TWILIO_MSG_SERVICE")
+        if twilio_msg_service:
+            client.messages.create(body=message, messaging_service_sid=twilio_msg_service, to=phone)
+        else:
+            client.messages.create(body=message, from_=TWILIO_FROM, to=phone)
         print(f"[SMS sent] To: {phone}")
     except Exception as e:
         print(f"[SMS error] {e}")
